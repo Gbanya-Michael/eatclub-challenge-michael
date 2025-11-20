@@ -19,6 +19,7 @@ const fetchRestaurantData = async () => {
     } else {
       url = apiUrl;
     }
+
     const res = await axios.get(url);
     return res.data;
   } catch (error) {
