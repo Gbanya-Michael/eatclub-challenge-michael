@@ -15,7 +15,7 @@ import Header from "../components/Header";
 import Toast from "../components/Toast";
 import { ApiService } from "../services/ApiService";
 
-export default function RestaurantDetailPage() {
+export default function RestaurantPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState(null);
@@ -37,27 +37,6 @@ export default function RestaurantDetailPage() {
       .join(" ");
   };
 
-  const getBestDiscount = (restaurant) => {
-    if (!(restaurant?.deals?.length > 0))
-      return { discount: 0, starts: null, dineIn: false };
-
-    const bestDeal = restaurant.deals.reduce((best, deal) => {
-      const discountValue = Number(deal.discount);
-      const bestDiscount = Number(best.discount);
-
-      if (Number.isFinite(discountValue) && discountValue > bestDiscount) {
-        return deal;
-      }
-      return best;
-    }, restaurant.deals[0]);
-
-    const discount = Number(bestDeal.discount) || 0;
-    const starts = bestDeal.start || bestDeal.open || null;
-    const dineIn = bestDeal.dineIn === "true" || bestDeal.dineIn === true;
-
-    return { discount, starts, dineIn };
-  };
-
   useEffect(() => {
     const loadRestaurant = async () => {
       try {
@@ -74,7 +53,7 @@ export default function RestaurantDetailPage() {
         }
 
         setRestaurant(foundRestaurant);
-        setHasValidImage(false); // Reset when restaurant changes
+        setHasValidImage(false);
       } catch (err) {
         setError(err.message);
         setToastMessage(`Error: ${err.message}`);
@@ -141,7 +120,6 @@ export default function RestaurantDetailPage() {
   }
 
   const imageSrc = restaurant.imageLink ? restaurant.imageLink : logo;
-  // const bestDeal = getBestDiscount(restaurant);
 
   return (
     <Container>
@@ -205,14 +183,13 @@ export default function RestaurantDetailPage() {
             </div>
           </div>
         </div>
-        {/* Restaurant Info */}
         <div className="max-w-[90%] mx-auto ">
           <div className="border-b border-gray-400 pb-4 pt-4">
             <h1 className="text-2xl mb-2 font-bold text-gray-900 text-center">
               {restaurant.name}
             </h1>
             {restaurant.cuisines && restaurant.cuisines.length > 0 && (
-              <ul className="flex flex-wrap gap-2 ">
+              <ul className="flex flex-wrap gap-2 justify-center">
                 {restaurant.cuisines.map((cuisine, index) => (
                   <li
                     key={index}
@@ -254,44 +231,51 @@ export default function RestaurantDetailPage() {
 
           {restaurant.deals && restaurant.deals.length > 0 && (
             <ol>
-              {restaurant.deals.map((deal, index) => (
-                <li
-                  key={deal.objectId || index}
-                  className="border-b border-gray-400 pb-4 pt-4 flex items-center justify-between"
-                >
-                  <div>
-                    <div className="  text-xl font-bold">
-                      {deal.lightning === "true" && (
-                        <span className="text-2xl">⚡</span>
-                      )}
-                      <span className="text-[#CD4637]">
-                        {deal.discount}% Off
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-                      {(deal.open || deal.start) && (deal.close || deal.end) ? (
-                        <span>
-                          Between {deal.start || deal.open} -{" "}
-                          {deal.end || deal.close}
+              {[...restaurant.deals]
+                .sort((a, b) => {
+                  const discountA = Number(a.discount) || 0;
+                  const discountB = Number(b.discount) || 0;
+                  return discountB - discountA;
+                })
+                .map((deal, index) => (
+                  <li
+                    key={deal.objectId || index}
+                    className="border-b border-gray-400 pb-4 pt-4 flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="  text-xl font-bold">
+                        {deal.lightning === "true" && (
+                          <span className="text-2xl">⚡</span>
+                        )}
+                        <span className="text-[#CD4637]">
+                          {deal.discount}% Off
                         </span>
-                      ) : (
-                        <>All day</>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                        {(deal.open || deal.start) &&
+                        (deal.close || deal.end) ? (
+                          <span>
+                            Between {deal.start || deal.open} -{" "}
+                            {deal.end || deal.close}
+                          </span>
+                        ) : (
+                          <>All day</>
+                        )}
+                      </div>
+                      {deal.qtyLeft && (
+                        <span className="text-xs text-gray-500">
+                          {deal.qtyLeft} Deals Left
+                        </span>
                       )}
                     </div>
-                    {deal.qtyLeft && (
-                      <span className="text-xs text-gray-500">
-                        {deal.qtyLeft} Deals Left
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <button className="px-4 p-1 outline-2 rounded-2xl text-red-700 font-bold hover:bg-red-100 border border-red-700 hover:border-red-900 transition cursor-pointer">
-                      Redeem
-                    </button>
-                  </div>
-                </li>
-              ))}
+                    <div>
+                      <button className="px-4 p-1 outline-2 rounded-2xl text-red-700 font-bold hover:bg-red-100 border border-red-700 hover:border-red-900 transition cursor-pointer">
+                        Redeem
+                      </button>
+                    </div>
+                  </li>
+                ))}
             </ol>
           )}
         </div>
