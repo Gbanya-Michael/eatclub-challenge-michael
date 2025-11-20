@@ -207,7 +207,7 @@ export default function Home() {
                         <span>0.5km Away,</span>{" "}
                         <span>{capitalizeWords(r.suburb)}</span>
                       </p>
-                      <div className="flex flex-wrap  text-gray-500">
+                      <div className="flex flex-wrap gap-1 text-sm text-gray-600">
                         {r.cuisines.map((c, index) => (
                           <span key={index} className="flex">
                             {capitalizeWords(c)}
