@@ -204,7 +204,7 @@ export default function Home() {
                         </button>
                       </div>
                       <p className="text-sm text-gray-500">
-                        <span>0.5km Away</span>{" "}
+                        <span>0.5km Away,</span>{" "}
                         <span>{capitalizeWords(r.suburb)}</span>
                       </p>
                       <div className="flex flex-wrap  text-gray-500">
